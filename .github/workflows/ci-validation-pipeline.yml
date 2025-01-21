@@ -12,96 +12,93 @@ jobs:
   changed_files:
     name: Detect changed directories
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - type: services
+            paths: [
+              'CompanyAPI',
+              'DJHostGateway',
+              'DocumentsAPI',
+              'EquipmentAPI',
+              'IdentityAPI',
+              'MailingAPI',
+              'MusicAPI',
+              'PartyAPI'
+            ]
+          - type: frontends
+            paths: [
+              'DJPanel',
+              'Identity',
+              'Music'
+            ]
     outputs:
-      services: ${{ steps.filter.outputs.services }}
-      frontends: ${{ steps.filter.outputs.frontends }}
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      
       - name: Filter changed files
         id: filter
         uses: dorny/paths-filter@v3
         with:
           filters: |
-            services:
-              - 'Services/**'
-            frontends:
-              - 'Frontends/**'
+            changes:
+              - '${{ matrix.type }}/${{ join(matrix.paths, '/**\n  - ') }}/**'
+      
+      - name: Set matrix output
+        id: set-matrix
+        run: |
+          changed_paths=$(cat << EOF
+          {
+            "type": "${{ matrix.type }}",
+            "paths": ${{ steps.filter.outputs.changes_files }}
+          }
+          EOF
+          )
+          echo "matrix=$changed_paths" >> $GITHUB_OUTPUT
 
   validate_dotnet:
     needs: changed_files
-    if: ${{ needs.changed_files.outputs.services == 'true' }}
+    if: ${{ fromJson(needs.changed_files.outputs.matrix).type == 'services' }}
     name: Validate PR - DotNet
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [
-          'Services/CompanyAPI',
-          'Services/DJHostGateway',
-          'Services/DocumentsAPI',
-          'Services/EquipmentAPI',
-          'Services/IdentityAPI',
-          'Services/MailingAPI',
-          'Services/MusicAPI',
-          'Services/PartyAPI'
-        ]
+        service: ${{ fromJson(needs.changed_files.outputs.matrix).paths }}
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    - name: Check if service changed
-      id: check_changes
-      uses: dorny/paths-filter@v3
-      with:
-        filters: |
-          service:
-            - '${{ matrix.service }}/**'
-    - name: Setup .NET
-      if: steps.check_changes.outputs.service == 'true'
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: '9.x'
-    - name: Restore dependencies
-      if: steps.check_changes.outputs.service == 'true'
-      run: dotnet restore ${{ matrix.service }}
-    - name: Build
-      if: steps.check_changes.outputs.service == 'true'
-      run: dotnet build ${{ matrix.service }} --no-restore --configuration Release
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '9.x'
+      - name: Restore dependencies
+        run: dotnet restore Services/${{ matrix.service }}
+      - name: Build
+        run: dotnet build Services/${{ matrix.service }} --no-restore --configuration Release
 
   validate_react:
     needs: changed_files
-    if: ${{ needs.changed_files.outputs.frontends == 'true' }}
+    if: ${{ fromJson(needs.changed_files.outputs.matrix).type == 'frontends' }}
     name: Validate PR - React
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [
-          'Frontends/DJPanel',
-          'Frontends/Identity',
-          'Frontends/Music'
-        ]
+        frontend: ${{ fromJson(needs.changed_files.outputs.matrix).paths }}
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    - name: Check if frontend changed
-      id: check_changes
-      uses: dorny/paths-filter@v2
-      with:
-        filters: |
-          frontend:
-            - '${{ matrix.service }}/**'
-    - name: Use Node version
-      if: steps.check_changes.outputs.frontend == 'true'
-      uses: actions/setup-node@v3
-      with:
-        node-version: '20.x'
-    - name: Install dependencies
-      if: steps.check_changes.outputs.frontend == 'true'
-      run: npm install
-      working-directory: ${{ matrix.service }}
-    - name: Build
-      if: steps.check_changes.outputs.frontend == 'true'
-      run: npm run build
-      working-directory: ${{ matrix.service }}
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Use Node version
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+      - name: Install dependencies
+        run: npm install
+        working-directory: Frontends/${{ matrix.frontend }}
+      - name: Build
+        run: npm run build
+        working-directory: Frontends/${{ matrix.frontend }}
     
 
     
