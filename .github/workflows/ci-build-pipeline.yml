@@ -1,12 +1,23 @@
 name: Build Projects
 
 on:
-  pull_request:
-    branches: [develop, 'release/**']
+  schedule:
+    - cron: '0 0 * * *'  # Runs at 00:00 UTC every day
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        type: choice
+        options:
+          - DEV
+          - PREPROD
+          - PROD
+        default: 'DEV'
 
 jobs:
   validate_dotnet:
-    name: Validate PR - DotNet
+    name: Build - DotNet
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -37,7 +48,7 @@ jobs:
         name: ${{ matrix.service }}
         path: ${{ matrix.service }}/bin/Release/net9.0/
   validate_react:
-    name: Validate PR - React
+    name: Build - React
     runs-on: ubuntu-latest
     strategy:
       matrix:
