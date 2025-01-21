@@ -1,95 +1,108 @@
-# Project Name
+# System Zarządzania Eventami
 
-## Overview
-This project is a microservices-based application with multiple services and frontends. It uses Docker for containerization and includes CI/CD pipeline configurations.
+## Przegląd
+System oparty na architekturze mikroserwisowej, składający się z wielu usług backendowych i frontendowych. Wykorzystuje Docker do konteneryzacji oraz zawiera skonfigurowane pipeline'y CI/CD.
 
-## Directory Structure
+## Struktura Projektu
 ```
 ├── .gitignore
 ├── Docker/
-|   ├── dj-panel-composer.yml
-|   ├── microfrontend.Dockerfile
-|   ├── microservice.Dockerfile
-|   └── nginx.conf
+│   ├── dj-panel-composer.yml
+│   ├── microfrontend.Dockerfile
+│   ├── microservice.Dockerfile
+│   └── nginx.conf
 ├── README.md
 ├── Frontends/
 ├── Micros.sln
 ├── Pipelines/
-├── run-chat.bat
-├── run-chat.sh
-├── run-dj-panel.bat
-├── run-dj-panel.sh
+├── Scripts/
+│   ├── run-chat.bat
+│   ├── run-chat.sh
+│   ├── run-dj-panel.bat
+│   └── run-dj-panel.sh
 └── Services/
-    ├── CompanyAPI/
-    ├── DJHostGateway/
-    ├── DocumentsAPI/
-    ├── EquipmentAPI/
-    ├── IdentityAPI/
-    ├── MailingAPI/
-    ├── MusicAPI/
-    ├── PartyAPI/
-    └── Shared/
+    ├── CompanyAPI/        # Zarządzanie firmami
+    ├── DJHostGateway/     # Gateway API
+    ├── DocumentsAPI/      # Obsługa dokumentów
+    ├── EquipmentAPI/      # Zarządzanie sprzętem
+    ├── IdentityAPI/       # Autentykacja i autoryzacja
+    ├── MailingAPI/        # Obsługa wiadomości email
+    ├── MusicAPI/          # Zarządzanie playlistami
+    ├── PartyAPI/          # Zarządzanie eventami
+    └── Shared/            # Współdzielone komponenty
 ```
 
-## Running the Services
+## Uruchamianie Aplikacji
 
-### Chat
-To run the Chat service, use the following commands:
+### Panel Czatu
+```bash
+# Windows
+Scripts/run-chat.bat
 
-#### On Windows:
-```sh
-run-chat.bat
+# Linux/MacOS
+./Scripts/run-chat.sh
 ```
 
-#### On Unix-based systems:
-```sh
-./run-chat.sh
+### Panel DJ-a
+```bash
+# Windows
+Scripts/run-dj-panel.bat
+
+# Linux/MacOS
+./Scripts/run-dj-panel.sh
 ```
 
-### DJ Panel
-To run the DJ Panel service, use the following commands:
+## Konfiguracja Docker
 
-#### On Windows:
-```sh
-run-dj-panel.bat
+Pliki konfiguracyjne Docker znajdują się w katalogu `Docker/`:
+
+- `dj-panel-composer.yml` - Konfiguracja Docker Compose dla Panelu DJ-a
+- `microfrontend.Dockerfile` - Konfiguracja budowania frontendów
+- `microservice.Dockerfile` - Konfiguracja budowania mikroserwisów
+- `nginx.conf` - Konfiguracja serwera NGINX
+
+## Mikroserwisy
+
+System składa się z następujących mikroserwisów:
+
+| Serwis | Opis |
+|--------|------|
+| CompanyAPI | Zarządzanie firmami i ich profilami |
+| DJHostGateway | API Gateway dla całego systemu |
+| DocumentsAPI | Zarządzanie dokumentami i umowami |
+| EquipmentAPI | Zarządzanie sprzętem i inwentarzem |
+| IdentityAPI | Autentykacja i zarządzanie użytkownikami |
+| MailingAPI | Obsługa komunikacji email |
+| MusicAPI | Zarządzanie playlistami i utworami |
+| PartyAPI | Zarządzanie eventami i rezerwacjami |
+
+## Rozwój Projektu
+
+### Wymagania
+- .NET 7.0 lub nowszy
+- Docker Desktop
+- Node.js 16+ (dla frontendów)
+- Visual Studio 2022 lub JetBrains Rider
+
+### Budowanie Projektu
+```bash
+dotnet build Micros.sln
 ```
 
-#### On Unix-based systems:
-```sh
-./run-dj-panel.sh
+### Uruchamianie Testów
+```bash
+dotnet test Micros.sln
 ```
 
-## Docker
-The project uses Docker for containerization. The Docker configuration files are located in the `Docker` directory.
+## CI/CD
 
-- `dj-panel-composer.yml`: Docker Compose file for the DJ Panel.
-- `microfrontend.Dockerfile`: Dockerfile for building microfrontends.
-- `microservice.Dockerfile`: Dockerfile for building microservices.
-- `nginx.conf`: NGINX configuration file.
+Pipeline'y CI/CD znajdują się w katalogu `Pipelines/` i obsługują:
+- Automatyczne budowanie
+- Testy jednostkowe i integracyjne
+- Deployment na środowiska testowe i produkcyjne
 
-## Services
-The `Services` directory contains the following microservices:
+## Licencja
+Projekt jest objęty licencją MIT. Szczegóły w pliku LICENSE.
 
-- `CompanyAPI`
-- `DJHostGateway`
-- `DocumentsAPI`
-- `EquipmentAPI`
-- `IdentityAPI`
-- `MailingAPI`
-- `MusicAPI`
-- `PartyAPI`
-- `Shared`
-
-Each service has its own `.dockerignore` file and project-specific files.
-
-## Frontends
-The `Frontends` directory contains the frontend code for the application.
-
-## Solution File
-The `Micros.sln` file is the Visual Studio solution file that includes all the projects in the workspace.
-
-## Pipelines
-The `Pipelines` directory contains CI/CD pipeline configurations.
-
-## License
-This project is licensed under the MIT License.
+## Wsparcie
+W przypadku problemów lub pytań, prosimy o utworzenie Issue w repozytorium projektu.
