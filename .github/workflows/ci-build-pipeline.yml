@@ -1,0 +1,70 @@
+name: Build Projects
+
+on:
+  pull_request:
+    branches: [develop, 'release/**']
+
+jobs:
+  validate_dotnet:
+    name: Validate PR - DotNet
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [
+          'Services/CompanyAPI',
+          'Services/DJHostGateway',
+          'Services/DocumentsAPI',
+          'Services/EquipmentAPI',
+          'Services/IdentityAPI',
+          'Services/MailingAPI',
+          'Services/MusicAPI',
+          'Services/PartyAPI'
+        ]
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '9.x'
+    - name: Restore dependencies
+      run: dotnet restore ${{ matrix.service }}
+    - name: Build
+      run: dotnet build ${{ matrix.service }} --no-restore --configuration Release
+    - name: Create artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.service }}
+        path: ${{ matrix.service }}/bin/Release/net9.0/
+  validate_react:
+    name: Validate PR - React
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [
+          'Frontends/DJPanel',
+          'Frontends/Identity',
+          'Frontends/Music'
+        ]
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Use Node version
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20.x'
+    - name: Install dependencies
+      run: npm install
+      working-directory: ${{ matrix.service }}
+    - name: Build
+      run: npm run build
+      working-directory: ${{ matrix.service }}
+    - name: Create artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.service }}
+        path: ${{ matrix.service }}/build/
+
+    
+
+
