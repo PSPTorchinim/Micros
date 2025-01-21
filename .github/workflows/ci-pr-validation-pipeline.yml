@@ -20,3 +20,9 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: '9.0.x'
+        
+    - name: Restore dependencies
+      run: dotnet restore Services/DJHostGateway/DJHostGateway.sln
+      
+    - name: Build
+      run: dotnet build Services/DJHostGateway/DJHostGateway.sln --no-restore --configuration Release
