@@ -1,0 +1,24 @@
+image: gitpod/workspace-dotnet
+
+vscode:
+  extensions:
+    - ms-dotnettools.vscode-dotnet-runtime
+    - ms-dotnettools.csharp
+    - dbaeumer.vscode-eslint
+    - dsznajder.es7-react-js-snippets
+
+tasks:
+  - name: Restore .NET packages for Company
+    init: |
+      cd Services/CompanyAPI
+      dotnet restore
+
+  - name: Restore .NET packages for Identity
+    init: |
+      cd Services/IdentityAPI
+      dotnet restore
+
+  - name: Install React Dependencies for DJPanel
+    init: |
+      cd Frontends/DJPanel
+      npm install

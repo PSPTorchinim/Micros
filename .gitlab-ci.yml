@@ -1,0 +1,24 @@
+include:
+  - local: Pipelines/ci-mr-validation-pipeline.yaml
+
+stages:
+  - validate
+  - build
+  - deploy
+
+build-projects:
+  stage: build
+  trigger:
+    include: Pipelines/ci-build-pipeline.yaml
+  
+.scheduled-build: 
+  extends: build-projects
+  schedule:
+    cron: "0 0 * * *"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: always
+    - if: $CI_COMMIT_BRANCH == "develop"
+      variables:
+        TARGET_ENVIRONMENT: "development"
+

@@ -1,0 +1,356 @@
+name: djpanel
+
+networks:
+  net-fe-gw:
+  net-gw-be:
+  net-be-db:
+  net-rabbit:
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:latest
+    environment:
+      - SA_PASSWORD=${SQLSERVER_PASSWORD}
+      - ACCEPT_EULA=Y
+    networks:
+      - net-be-db
+    ports:
+      - "1433:1433"
+    healthcheck:
+      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P ${SQLSERVER_PASSWORD} -Q "SELECT 1" -C || exit 1
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  rabbitmq:
+    image: rabbitmq:latest
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
+      start_period: 10s
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
+    ports:
+      - 5672:5672
+      - 15672:15672
+      - 15692:15692
+    networks:
+      - net-rabbit
+
+  mongodb_container:
+    image: mongo:latest
+    ports:
+      - 27017:27017
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGODB_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGODB_PASSWORD}
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    networks:
+      - net-be-db
+
+  apigateway:
+    image: djpanel-apigateway-be:latest
+    build:
+      context: ../
+      dockerfile: Docker/microservice.Dockerfile
+      args:
+        - MICROSERVICE_PATH=Services
+        - MICROSERVICE_NAME=DJHostGateway
+    ports:
+      - 8080:8080
+    networks:
+      - net-gw-be
+      - net-fe-gw
+    environment:
+      - SECURE_KEY=${SECURE_KEY}
+      - JWT_KEY=${JWT_KEY}
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      identity_be:
+        condition: service_healthy
+      music_be:
+        condition: service_healthy
+      gear_be:
+        condition: service_healthy
+      documents_be:
+        condition: service_healthy
+      brand_be:
+        condition: service_healthy
+      party_be:
+        condition: service_healthy
+      mailing_be:
+        condition: service_healthy
+
+  identity_be:
+    image: djpanel-identity-be:latest
+    build:
+      context: ../
+      dockerfile: Docker/microservice.Dockerfile
+      args:
+        - MICROSERVICE_PATH=Services
+        - MICROSERVICE_NAME=IdentityAPI
+    ports:
+      - 8081:8080
+    networks:
+      - net-be-db
+      - net-rabbit
+      - net-gw-be
+    environment:
+      - DATABASE_HOST=${SQLSERVER_HOST}
+      - DATABASE_USER=${SQLSERVER_USER}
+      - DATABASE_PASSWORD=${SQLSERVER_PASSWORD}
+      - DATABASE_CATALOG=${IDENTITY_DATABASE_CATALOG}
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - SECURE_KEY=${SECURE_KEY}
+      - JWT_KEY=${JWT_KEY}
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  music_be:
+    image: djpanel-music_be:latest
+    build:
+      context: ../
+      dockerfile: Docker/microservice.Dockerfile
+      args: 
+        - MICROSERVICE_PATH=Services
+        - MICROSERVICE_NAME=MusicAPI
+    ports:
+      - 8082:8080
+    networks:
+      - net-be-db
+      - net-rabbit
+      - net-gw-be
+    environment:
+      - DATABASE_HOST=${SQLSERVER_HOST}
+      - DATABASE_USER=${SQLSERVER_USER}
+      - DATABASE_PASSWORD=${SQLSERVER_PASSWORD}
+      - DATABASE_CATALOG=${MUSIC_DATABASE_CATALOG}
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - SECURE_KEY=${SECURE_KEY}
+      - JWT_KEY=${JWT_KEY}
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  gear_be:
+    image: djpanel-gear_be:latest
+    build:
+      context: ../
+      dockerfile: Docker/microservice.Dockerfile
+      args:
+        - MICROSERVICE_PATH=Services
+        - MICROSERVICE_NAME=EquipmentAPI
+    ports:
+      - 8083:8080
+    networks:
+      - net-be-db
+      - net-rabbit
+      - net-gw-be
+    environment:
+      - DATABASE_HOST=${SQLSERVER_HOST}
+      - DATABASE_USER=${SQLSERVER_USER}
+      - DATABASE_PASSWORD=${SQLSERVER_PASSWORD}
+      - DATABASE_CATALOG=${GEAR_DATABASE_CATALOG}
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - SECURE_KEY=${SECURE_KEY}
+      - JWT_KEY=${JWT_KEY}
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  documents_be:
+    image: djpanel-documents_be:latest
+    build:
+      context: ../
+      dockerfile: Docker/microservice.Dockerfile
+      args:
+        - MICROSERVICE_PATH=Services
+        - MICROSERVICE_NAME=DocumentsAPI
+    ports:
+      - 8084:8080
+    networks:
+      - net-be-db
+      - net-rabbit
+      - net-gw-be
+    environment:
+      - DATABASE_HOST=${MONGODB_HOST}
+      - DATABASE_USER=${MONGODB_USER}
+      - DATABASE_PASSWORD=${MONGODB_PASSWORD}
+      - DATABASE_CATALOG=${DOCUMENTS_DATABASE_CATALOG}
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - SECURE_KEY=${SECURE_KEY}
+      - JWT_KEY=${JWT_KEY}
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      mongodb_container:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  brand_be:
+    image: djpanel-brand_be:latest
+    build:
+      context: ../
+      dockerfile: Docker/microservice.Dockerfile
+      args:
+        - MICROSERVICE_PATH=Services
+        - MICROSERVICE_NAME=CompanyAPI
+    ports:
+      - 8085:8080
+    networks:
+      - net-be-db
+      - net-rabbit
+      - net-gw-be
+    environment:
+      - DATABASE_HOST=${SQLSERVER_HOST}
+      - DATABASE_USER=${SQLSERVER_USER}
+      - DATABASE_PASSWORD=${SQLSERVER_PASSWORD}
+      - DATABASE_CATALOG=${BRAND_DATABASE_CATALOG}
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - SECURE_KEY=${SECURE_KEY}
+      - JWT_KEY=${JWT_KEY}
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  mailing_be:
+    image: djpanel-mailing_be:latest
+    build:
+      context: ../
+      dockerfile: Docker/microservice.Dockerfile
+      args:
+        - MICROSERVICE_PATH=Services
+        - MICROSERVICE_NAME=MailingAPI
+    ports:
+      - 8087:8080
+    networks:
+      - net-be-db
+      - net-rabbit
+      - net-gw-be
+    environment:
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - SECURE_KEY=${SECURE_KEY}
+      - JWT_KEY=${JWT_KEY}
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  party_be:
+    image: djpanel-party_be:latest
+    build:
+      context: ../
+      dockerfile: Docker/microservice.Dockerfile
+      args:
+        - MICROSERVICE_PATH=Services
+        - MICROSERVICE_NAME=PartyAPI
+    ports:
+      - 8088:8080
+    networks:
+      - net-be-db
+      - net-rabbit
+      - net-gw-be
+    environment:
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - SECURE_KEY=${SECURE_KEY}
+      - JWT_KEY=${JWT_KEY}
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+  
+  host_fe:
+    image: host-fe:latest
+    build:
+      context: ../
+      dockerfile: Docker/microfrontend.Dockerfile
+      args:
+        - MICROFRONTEND_NAME=DJPanel
+        - FRONTEND_NGINX_FILE=Docker/nginx.conf
+    ports:
+      - 3000:80
+    networks:
+      - net-fe-gw
+      - net-rabbit
+    environment:
+      - REACT_APP_IDENTITY_URL=${REACT_APP_IDENTITY_URL}
+      - REACT_APP_MUSIC_URL=${REACT_APP_MUSIC_URL}
+    depends_on:
+      apigateway:
+        condition: service_healthy
+      identity_fe:
+        condition: service_started
+
+  identity_fe:
+    image: djpanel-identity_fe:latest
+    build:
+      context: ../
+      dockerfile: Docker/microfrontend.Dockerfile
+      args:
+        - MICROFRONTEND_NAME=Identity
+        - FRONTEND_NGINX_FILE=Docker/nginx.conf
+    ports:
+      - 3001:80
+    networks:
+      - net-fe-gw
+      - net-rabbit
+    depends_on:
+      apigateway:
+        condition: service_healthy
+
+  music_fe:
+    image: djpanel-music_fe
+    build:
+      context: ../
+      dockerfile: Docker/microfrontend.Dockerfile
+      args:
+        - MICROFRONTEND_NAME=Music
+        - FRONTEND_NGINX_FILE=Docker/nginx.conf
+    ports:
+      - 3002:80
+    networks:
+      - net-fe-gw
+      - net-rabbit
+    depends_on:
+      apigateway:
+        condition: service_healthy
