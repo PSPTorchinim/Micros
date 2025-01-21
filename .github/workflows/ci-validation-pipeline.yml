@@ -2,10 +2,7 @@ name: PR Validation
 
 on:
   pull_request:
-    branches: 
-      - develop
-      - 'release/**'
-    types: [opened, synchronize, reopened]
+    branches: [develop, 'release/**']
 
 jobs:
   validate_dotnet:
