@@ -1,0 +1,1 @@
+docker-compose -f Docker/dj-panel-composer.yml --env-file Docker/djpanel.env up --build
