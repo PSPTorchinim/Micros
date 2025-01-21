@@ -1,0 +1,54 @@
+name: PR Validation
+
+on:
+  pull_request:
+    branches: 
+      - develop
+      - 'release/**'
+    types: [opened, synchronize, reopened]
+
+jobs:
+  validate_dotnet:
+    name: Validate PR - DotNet
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [
+          'Services/CompanyAPI',
+          'Services/DJHostGateway',
+          'Services/DocumentsAPI',
+          'Services/EquipmentAPI',
+          'Services/IdentityAPI',
+          'Services/MailingAPI',
+          'Services/MusicAPI',
+          'Services/PartyAPI'
+        ]
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '9.x'
+    - name: Restore dependencies
+      run: dotnet restore ${{ matrix.service }}
+    - name: Build
+      run: dotnet build ${{ matrix.service }} --no-restore --configuration Release
+  validate_react:
+    name: Validate PR - React
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [
+          'Frontends/DJPanel',
+          'Frontends/Identity',
+          'Frontends/Music'
+        ]
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Use Node version
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20.x'
+
