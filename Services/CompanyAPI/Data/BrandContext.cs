@@ -16,14 +16,8 @@ namespace CompanyAPI.Data
         public DbSet<ClientCustomField> ClientCustomFields {get;set;}
         public DbSet<BrandCustomField> BrandCustomFields {get;set;}
 
-        public BrandContext(DbContextOptions<BrandContext> options) : base(options)
-        {
+        public BrandContext(DbContextOptions<BrandContext> options) : base(options){}
 
-        }
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            
-        }
+        protected override void OnModelCreating(ModelBuilder modelBuilder){}
     }
 }
