@@ -16,7 +16,7 @@ on:
         default: 'DEV'
 
 jobs:
-  validate_dotnet:
+  build_dotnet:
     name: Build - DotNet
     runs-on: ubuntu-latest
     strategy:
@@ -34,23 +34,35 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+    - name: Check if service changed
+      id: check_changes
+      uses: dorny/paths-filter@v3
+      with:
+        filters: |
+          service:
+            - '${{ matrix.service }}/**'
     - name: Setup .NET
+      if: steps.check_changes.outputs.service == 'true'
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: '9.x'
     - name: Restore dependencies
+      if: steps.check_changes.outputs.service == 'true'
       run: dotnet restore ${{ matrix.service }}
     - name: Build
+      if: steps.check_changes.outputs.service == 'true'
       run: dotnet build ${{ matrix.service }} --no-restore --configuration Release
     - name: Prepare artifact name
+      if: steps.check_changes.outputs.service == 'true'
       id: prepare-name
       run: echo "artifact_name=$(echo ${{ matrix.service }} | tr '/' '.')" >> $GITHUB_OUTPUT
     - name: Create artifact
+      if: steps.check_changes.outputs.service == 'true'
       uses: actions/upload-artifact@v3
       with:
         name: ${{ steps.prepare-name.outputs.artifact_name }}
         path: ${{ matrix.service }}/bin/Release/net9.0/
-  validate_react:
+  build_react:
     name: Build - React
     runs-on: ubuntu-latest
     strategy:
@@ -63,20 +75,32 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+    - name: Check if service changed
+      id: check_changes
+      uses: dorny/paths-filter@v3
+      with:
+        filters: |
+          service:
+            - '${{ matrix.service }}/**'
     - name: Use Node version
+      if: steps.check_changes.outputs.service == 'true'
       uses: actions/setup-node@v3
       with:
         node-version: '20.x'
     - name: Install dependencies
+      if: steps.check_changes.outputs.service == 'true'
       run: npm install
       working-directory: ${{ matrix.service }}
     - name: Build
+      if: steps.check_changes.outputs.service == 'true'
       run: npm run build
       working-directory: ${{ matrix.service }}
     - name: Prepare artifact name
+      if: steps.check_changes.outputs.service == 'true'
       id: prepare-name
       run: echo "artifact_name=$(echo ${{ matrix.service }} | tr '/' '.')" >> $GITHUB_OUTPUT
     - name: Create artifact
+      if: steps.check_changes.outputs.service == 'true'
       uses: actions/upload-artifact@v3
       with:
         name: ${{ steps.prepare-name.outputs.artifact_name }}
