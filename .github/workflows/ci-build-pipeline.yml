@@ -16,14 +16,6 @@ on:
         default: 'DEV'
 
 jobs:
-  set_date:
-    name: Set Date
-    outputs:
-      date: ${{ steps.set-date.outputs.date }}
-    steps:
-      - name: Set Date
-        id: set-date
-        run: echo "date=$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
   validate_dotnet:
     name: Build - DotNet
     runs-on: ubuntu-latest
@@ -53,10 +45,10 @@ jobs:
     - name: Prepare artifact name
       id: prepare-name
       run: echo "artifact_name=$(echo ${{ matrix.service }} | tr '/' '.')" >> $GITHUB_OUTPUT
-    - name: Create artifact (Date is used to ensure uniqueness)
+    - name: Create artifact
       uses: actions/upload-artifact@v3
       with:
-        name: ${{ github.event.inputs.environment }}.${{ steps.prepare-name.outputs.artifact_name }}.${{ jobs.set-date.outputs.date }}
+        name: ${{ github.event.inputs.environment }}.${{ steps.prepare-name.outputs.artifact_name }}
         path: ${{ matrix.service }}/bin/Release/net9.0/
   validate_react:
     name: Build - React
@@ -87,7 +79,7 @@ jobs:
     - name: Create artifact
       uses: actions/upload-artifact@v3
       with:
-        name: ${{ github.event.inputs.environment }}.${{ steps.prepare-name.outputs.artifact_name }}.${{ jobs.set-date.outputs.date }}
+        name: ${{ github.event.inputs.environment }}.${{ steps.prepare-name.outputs.artifact_name }}
         path: ${{ matrix.service }}/dist/
 
     
