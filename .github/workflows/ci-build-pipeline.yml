@@ -42,10 +42,13 @@ jobs:
       run: dotnet restore ${{ matrix.service }}
     - name: Build
       run: dotnet build ${{ matrix.service }} --no-restore --configuration Release
+    - name: Prepare artifact name
+      id: prepare-name
+      run: echo "artifact_name=$(echo ${{ matrix.service }} | tr '/' '.')" >> $GITHUB_OUTPUT
     - name: Create artifact
       uses: actions/upload-artifact@v3
       with:
-        name: ${{ matrix.service }}
+        name: ${{ steps.prepare-name.outputs.artifact_name }}
         path: ${{ matrix.service }}/bin/Release/net9.0/
   validate_react:
     name: Build - React
@@ -70,11 +73,14 @@ jobs:
     - name: Build
       run: npm run build
       working-directory: ${{ matrix.service }}
+    - name: Prepare artifact name
+      id: prepare-name
+      run: echo "artifact_name=$(echo ${{ matrix.service }} | tr '/' '.')" >> $GITHUB_OUTPUT
     - name: Create artifact
       uses: actions/upload-artifact@v3
       with:
-        name: ${{ matrix.service }}
-        path: ${{ matrix.service }}/build/
+        name: ${{ steps.prepare-name.outputs.artifact_name }}
+        path: ${{ matrix.service }}/dist/
 
     
 
