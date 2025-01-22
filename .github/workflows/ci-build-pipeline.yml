@@ -60,7 +60,7 @@ jobs:
       if: steps.check_changes.outputs.service == 'true'
       uses: actions/upload-artifact@v3
       with:
-        name: ${{ steps.prepare-name.outputs.artifact_name }}
+        name: ${{ github.event.inputs.environment }}.${{ steps.prepare-name.outputs.artifact_name }}
         path: ${{ matrix.service }}/bin/Release/net9.0/
   build_react:
     name: Build - React
@@ -103,7 +103,7 @@ jobs:
       if: steps.check_changes.outputs.service == 'true'
       uses: actions/upload-artifact@v3
       with:
-        name: ${{ steps.prepare-name.outputs.artifact_name }}
+        name: ${{ github.event.inputs.environment }}.${{ steps.prepare-name.outputs.artifact_name }}
         path: ${{ matrix.service }}/dist/
 
     

@@ -1,0 +1,44 @@
+name: Release Projects
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        type: choice
+        options:
+          - DEV
+          - PREPROD
+          - PROD
+jobs:
+  release_artifacts:
+    name: Release Artifacts
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [
+          'Services/CompanyAPI',
+          'Services/DJHostGateway',
+          'Services/DocumentsAPI',
+          'Services/EquipmentAPI',
+          'Services/IdentityAPI',
+          'Services/MailingAPI',
+          'Services/MusicAPI',
+          'Services/PartyAPI',
+          'Frontends/DJPanel',
+          'Frontends/Identity',
+          'Frontends/Music'
+        ]
+    steps:
+    - name: Prepare artifact name
+      id: prepare-name
+      run: echo "artifact_name=$(echo ${{ matrix.service }} | tr '/' '.')" >> $GITHUB_OUTPUT
+    - uses: actions/download-artifact@v3
+      with:
+        name: ${{ github.event.inputs.environment }}.${{ steps.prepare-name.outputs.artifact_name }}
+        path: build
+    - run: zip -r build.zip build/
+    - uses: ncipollo/release-action@v1
+      with:
+        artifacts: "build.zip"
