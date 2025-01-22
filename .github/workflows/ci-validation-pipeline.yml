@@ -9,28 +9,7 @@ permissions:
   pull-requests: read
 
 jobs:
-  changed_files:
-    name: Detect changed directories
-    runs-on: ubuntu-latest
-    outputs:
-      services: ${{ steps.filter.outputs.services }}
-      frontends: ${{ steps.filter.outputs.frontends }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Filter changed files
-        id: filter
-        uses: dorny/paths-filter@v3
-        with:
-          filters: |
-            services:
-              - 'Services/**'
-            frontends:
-              - 'Frontends/**'
-
   validate_dotnet:
-    needs: changed_files
-    if: ${{ needs.changed_files.outputs.services == 'true' }}
     name: Validate PR - DotNet
     runs-on: ubuntu-latest
     strategy:
@@ -48,6 +27,7 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      
     - name: Check if service changed
       id: check_changes
       uses: dorny/paths-filter@v3
@@ -55,21 +35,22 @@ jobs:
         filters: |
           service:
             - '${{ matrix.service }}/**'
+            
     - name: Setup .NET
       if: steps.check_changes.outputs.service == 'true'
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: '9.x'
+        
     - name: Restore dependencies
       if: steps.check_changes.outputs.service == 'true'
       run: dotnet restore ${{ matrix.service }}
+      
     - name: Build
       if: steps.check_changes.outputs.service == 'true'
       run: dotnet build ${{ matrix.service }} --no-restore --configuration Release
 
   validate_react:
-    needs: changed_files
-    if: ${{ needs.changed_files.outputs.frontends == 'true' }}
     name: Validate PR - React
     runs-on: ubuntu-latest
     strategy:
@@ -82,22 +63,26 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      
     - name: Check if frontend changed
       id: check_changes
-      uses: dorny/paths-filter@v2
+      uses: dorny/paths-filter@v3
       with:
         filters: |
           frontend:
             - '${{ matrix.service }}/**'
+            
     - name: Use Node version
       if: steps.check_changes.outputs.frontend == 'true'
       uses: actions/setup-node@v3
       with:
         node-version: '20.x'
+        
     - name: Install dependencies
       if: steps.check_changes.outputs.frontend == 'true'
       run: npm install
       working-directory: ${{ matrix.service }}
+      
     - name: Build
       if: steps.check_changes.outputs.frontend == 'true'
       run: npm run build
