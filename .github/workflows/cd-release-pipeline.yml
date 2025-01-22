@@ -11,3 +11,10 @@ on:
           - DEV
           - PREPROD
           - PROD
+jobs:
+  release_dotnet:
+    name: Release - DotNet
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check artifacts
+        uses: actions/checkout@v4
