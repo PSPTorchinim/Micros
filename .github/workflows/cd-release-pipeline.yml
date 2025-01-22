@@ -40,11 +40,26 @@ jobs:
         # Assuming artifacts are stored in a predictable location (e.g., releases directory)
         latest_artifact=$(ls -1tr ${{ github.event.inputs.environment }}.${{ steps.prepare-name.outputs.artifact_name }}*.zip | tail -1)
         echo "latest_artifact=$latest_artifact" >> $GITHUB_OUTPUT
+    - name: Check if artifact was already released
+      id: check-release
+      run: |
+        artifact_name=$(basename ${{ steps.get-latest-artifact.outputs.latest_artifact }})
+        if gh release list | grep -q "$artifact_name"; then
+          echo "already_released=true" >> $GITHUB_OUTPUT
+        else
+          echo "already_released=false" >> $GITHUB_OUTPUT
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - uses: actions/download-artifact@v3
+      if: steps.check-release.outputs.already_released == 'false'
       with:
         name: ${{ steps.get-latest-artifact.outputs.latest_artifact }}
         path: build
-    - run: zip -r build.zip build/
+    - name: Create release package
+      if: steps.check-release.outputs.already_released == 'false'
+      run: zip -r build.zip build/
     - uses: ncipollo/release-action@v1
+      if: steps.check-release.outputs.already_released == 'false'
       with:
         artifacts: "build.zip"
