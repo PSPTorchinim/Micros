@@ -80,7 +80,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: ${{ steps.prepare-name.outputs.artifact_name }}
-        path: ${{ matrix.service }}/build/
+        path: ${{ matrix.service }}/dist/
 
     
 
