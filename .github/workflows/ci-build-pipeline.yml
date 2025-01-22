@@ -16,7 +16,15 @@ on:
         default: 'DEV'
 
 jobs:
-  build_dotnet:
+  set_date:
+    name: Set Date
+    outputs:
+      date: ${{ steps.set-date.outputs.date }}
+    steps:
+      - name: Set Date
+        id: set-date
+        run: echo "date=$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
+  validate_dotnet:
     name: Build - DotNet
     runs-on: ubuntu-latest
     strategy:
@@ -46,6 +54,13 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: '9.x'
+    - name: Check if service changed
+      id: check_changes
+      uses: dorny/paths-filter@v3
+      with:
+        filters: |
+          service:
+            - '${{ matrix.service }}/**'
     - name: Restore dependencies
       if: steps.check_changes.outputs.service == 'true'
       run: dotnet restore ${{ matrix.service }}
@@ -60,7 +75,7 @@ jobs:
       if: steps.check_changes.outputs.service == 'true'
       uses: actions/upload-artifact@v3
       with:
-        name: ${{ github.event.inputs.environment }}.${{ steps.prepare-name.outputs.artifact_name }}
+        name: ${{ github.event.inputs.environment }}.${{ steps.prepare-name.outputs.artifact_name }}.${{ jobs.set-date.outputs.date }}
         path: ${{ matrix.service }}/bin/Release/net9.0/
   build_react:
     name: Build - React
@@ -87,6 +102,13 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: '20.x'
+    - name: Check if service changed
+      id: check_changes
+      uses: dorny/paths-filter@v3
+      with:
+        filters: |
+          service:
+            - '${{ matrix.service }}/**'
     - name: Install dependencies
       if: steps.check_changes.outputs.service == 'true'
       run: npm install
@@ -103,7 +125,7 @@ jobs:
       if: steps.check_changes.outputs.service == 'true'
       uses: actions/upload-artifact@v3
       with:
-        name: ${{ github.event.inputs.environment }}.${{ steps.prepare-name.outputs.artifact_name }}
+        name: ${{ github.event.inputs.environment }}.${{ steps.prepare-name.outputs.artifact_name }}.${{ jobs.set-date.outputs.date }}
         path: ${{ matrix.service }}/dist/
 
     
