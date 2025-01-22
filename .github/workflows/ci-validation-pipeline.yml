@@ -3,6 +3,7 @@ name: PR Validation
 on:
   pull_request:
     branches: [develop, 'release/**']
+    before: ${{ github.event.base.sha }}
 
 permissions:
   contents: read
