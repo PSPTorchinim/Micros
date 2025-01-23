@@ -48,6 +48,7 @@ jobs:
       id: check_changes
       uses: dorny/paths-filter@v3
       with:
+        base: ${{ github.ref }}
         filters: |
           service:
             - '${{ matrix.service }}/**'
@@ -60,6 +61,7 @@ jobs:
       id: check_changes_dotnet
       uses: dorny/paths-filter@v3
       with:
+        base: ${{ github.ref }}
         filters: |
           service:
             - '${{ matrix.service }}/**'
