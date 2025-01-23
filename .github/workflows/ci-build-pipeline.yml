@@ -18,6 +18,7 @@ on:
 jobs:
   set_date:
     name: Set Date
+    runs-on: ubuntu-latest
     outputs:
       date: ${{ steps.set-date.outputs.date }}
     steps:
@@ -25,6 +26,7 @@ jobs:
         id: set-date
         run: echo "date=$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
   validate_dotnet:
+    needs: set_date
     name: Build - DotNet
     runs-on: ubuntu-latest
     strategy:
@@ -75,9 +77,10 @@ jobs:
       if: steps.check_changes.outputs.service == 'true'
       uses: actions/upload-artifact@v3
       with:
-        name: ${{ github.event.inputs.environment }}.${{ steps.prepare-name.outputs.artifact_name }}.${{ jobs.set-date.outputs.date }}
+        name: ${{ github.event.inputs.environment }}.${{ steps.prepare-name.outputs.artifact_name }}.${{ needs.set_date.outputs.date }}
         path: ${{ matrix.service }}/bin/Release/net9.0/
   build_react:
+    needs: set_date
     name: Build - React
     runs-on: ubuntu-latest
     strategy:
@@ -125,7 +128,7 @@ jobs:
       if: steps.check_changes.outputs.service == 'true'
       uses: actions/upload-artifact@v3
       with:
-        name: ${{ github.event.inputs.environment }}.${{ steps.prepare-name.outputs.artifact_name }}.${{ jobs.set-date.outputs.date }}
+        name: ${{ github.event.inputs.environment }}.${{ steps.prepare-name.outputs.artifact_name }}.${{ needs.set_date.outputs.date }}
         path: ${{ matrix.service }}/dist/
 
     

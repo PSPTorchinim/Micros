@@ -63,3 +63,4 @@ jobs:
       if: steps.check-release.outputs.already_released == 'false'
       with:
         artifacts: "build.zip"
+        allowUpdates: 'true'
