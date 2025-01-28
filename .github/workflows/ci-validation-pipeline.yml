@@ -28,11 +28,14 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 2  # Potrzebujemy poprzedniego commita do porównania
       
     - name: Check if service changed
       id: check_changes
       uses: dorny/paths-filter@v3
       with:
+        base: 'HEAD^'  # Porównuj z poprzednim commitem
         filters: |
           service:
             - '${{ matrix.service }}/**'
