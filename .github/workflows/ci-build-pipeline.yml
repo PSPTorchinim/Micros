@@ -10,15 +10,16 @@ on:
         required: true
         type: choice
         options:
-          - DEV
-          - PREPROD
-          - PROD
-        default: 'DEV'
+          - Development
+          - Preproduction
+          - Production
+        default: 'Development'
 
 jobs:
   set_date:
     name: Set Date
     runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
     outputs:
       date: ${{ steps.set-date.outputs.date }}
     steps:
@@ -29,6 +30,7 @@ jobs:
     needs: set_date
     name: Build - DotNet
     runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
     strategy:
       matrix:
         service: [
@@ -78,6 +80,7 @@ jobs:
     needs: set_date
     name: Build - React
     runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
     strategy:
       matrix:
         service: [
