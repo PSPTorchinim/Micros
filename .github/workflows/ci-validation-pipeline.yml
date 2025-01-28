@@ -2,7 +2,7 @@ name: PR Validation
 
 on:
   pull_request:
-    branches: [develop, 'release/**']
+    branches: [develop, 'preprod/**', 'release/**']
 
 permissions:
   contents: read
@@ -12,6 +12,12 @@ jobs:
   validate_dotnet:
     name: Validate PR - DotNet
     runs-on: ubuntu-latest
+    environment: >-
+      ${{
+        github.base_ref == 'develop' && 'Development' ||
+        startsWith(github.base_ref, 'preprod/') && 'Preproduction' ||
+        startsWith(github.base_ref, 'release/') && 'Production' || ''
+      }}
     strategy:
       matrix:
         service: [
@@ -55,6 +61,12 @@ jobs:
   validate_react:
     name: Validate PR - React
     runs-on: ubuntu-latest
+    environment: >-
+      ${{
+        github.base_ref == 'develop' && 'Development' ||
+        startsWith(github.base_ref, 'preprod/') && 'Preproduction' ||
+        startsWith(github.base_ref, 'release/') && 'Production' || ''
+      }}
     strategy:
       matrix:
         service: [

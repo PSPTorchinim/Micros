@@ -8,13 +8,14 @@ on:
         required: true
         type: choice
         options:
-          - DEV
-          - PREPROD
-          - PROD
+          - Development
+          - Preproduction
+          - Production
 jobs:
   release_artifacts:
     name: Release Artifacts
     runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
     strategy:
       matrix:
         service: [
