@@ -3,7 +3,6 @@ name: PR Validation
 on:
   pull_request:
     branches: [develop, 'release/**']
-    before: ${{ GITHUB_BASE_REF }} }}
 
 permissions:
   contents: read
