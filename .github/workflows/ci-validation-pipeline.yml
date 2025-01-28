@@ -34,8 +34,6 @@ jobs:
       id: check_changes
       uses: dorny/paths-filter@v3
       with:
-        base: 'HEAD^'  # Porównuj z poprzednim commitem
-        token: ${{ secrets.ACCESS_TOKEN }}
         filters: |
           service:
             - '${{ matrix.service }}/**'
