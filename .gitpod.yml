@@ -8,27 +8,48 @@ vscode:
     - dsznajder.es7-react-js-snippets
 
 tasks:
-  - name: Restore .NET packages for ${SERVICE}
-    _matrix:
-      SERVICE:
-        - CompanyAPI
-        - IdentityAPI
-        - DJHostGateway
-        - DocumentsAPI
-        - EquipmentAPI
-        - MailingAPI
-        - MusicAPI
-        - PartyAPI
+  - name: Restore .NET packages for CompanyAPI
     init: |
-      cd Services/${SERVICE}
+      cd Services/CompanyAPI
+      dotnet restore
+  - name: Restore .NET packages for IdentityAPI
+    init: |
+      cd Services/IdentityAPI
+      dotnet restore
+  - name: Restore .NET packages for DJHostGateway
+    init: |
+      cd Services/DJHostGateway
+      dotnet restore
+  - name: Restore .NET packages for DocumentsAPI
+    init: |
+      cd Services/DocumentsAPI
+      dotnet restore
+  - name: Restore .NET packages for DocumentsAPI
+    init: |
+      cd Services/EquipmentAPI
+      dotnet restore
+  - name: Restore .NET packages for MailingAPI
+    init: |
+      cd Services/MailingAPI
+      dotnet restore
+  - name: Restore .NET packages for MusicAPI
+    init: |
+      cd Services/MusicAPI
+      dotnet restore
+  - name: Restore .NET packages for PartyAPI
+    init: |
+      cd Services/PartyAPI
       dotnet restore
 
-  - name: Install Dependencies for ${FRONTEND}
-    _matrix:
-      FRONTEND:
-        - DJPanel
-        - Identity
-        - Music
+  - name: Install Dependencies for DJPanel
     init: |
-      cd Frontends/${FRONTEND}
+      cd Frontends/DJPanel
+      npm install
+  - name: Install Dependencies for Identity
+    init: |
+      cd Frontends/Identity
+      npm install
+  - name: Install Dependencies for Music
+    init: |
+      cd Frontends/Music
       npm install
