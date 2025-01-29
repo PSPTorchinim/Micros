@@ -54,3 +54,17 @@ tasks:
     init: |
       cd Frontends/Music
       npm install
+
+  - name: Setup Environment Variables
+    init: |
+      for secret in $(echo $GITHUB_SECRETS | jq -r 'keys[]'); do
+        value=$(echo $GITHUB_SECRETS | jq -r ".[\"$secret\"]")
+        echo "export $secret='$value'" >> ~/.bashrc
+      done
+      
+      for var in $(echo $GITHUB_VARS | jq -r 'keys[]'); do
+        value=$(echo $GITHUB_VARS | jq -r ".[\"$var\"]")
+        echo "export $var='$value'" >> ~/.bashrc
+      done
+      
+      source ~/.bashrc
