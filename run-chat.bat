@@ -1,1 +1,1 @@
-docker-compose -f Docker/chat-composer.yml --env-file Docker/chat.env up --build
+docker-compose -f Docker/chat-composer.yml up --build
