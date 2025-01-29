@@ -8,6 +8,10 @@ vscode:
     - dbaeumer.vscode-eslint
     - dsznajder.es7-react-js-snippets
 
+environment:
+  variables:
+    Environment: Development
+
 tasks:
   - name: Restore .NET packages for CompanyAPI
     init: |
@@ -54,35 +58,3 @@ tasks:
     init: |
       cd Frontends/Music
       npm install
-
-  - name: Setup Environment Variables
-    init: |
-      echo "# Database configuration" > Docker/djpanel.env
-      echo "SQLSERVER_PASSWORD=${SQLSERVER_PASSWORD}" >> Docker/djpanel.env
-      echo "SQLSERVER_USER=${SQLSERVER_USER}" >> Docker/djpanel.env
-      echo "SQLSERVER_HOST=${SQLSERVER_HOST}" >> Docker/djpanel.env
-      
-      echo "# MongoDB configuration" >> Docker/djpanel.env
-      echo "MONGODB_USER=${MONGODB_USER}" >> Docker/djpanel.env
-      echo "MONGODB_PASSWORD=${MONGODB_PASSWORD}" >> Docker/djpanel.env
-      echo "MONGODB_HOST=${MONGODB_HOST}" >> Docker/djpanel.env
-      
-      echo "# RabbitMQ configuration" >> Docker/djpanel.env
-      echo "RABBITMQ_USER=${RABBITMQ_USER}" >> Docker/djpanel.env
-      echo "RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}" >> Docker/djpanel.env
-      echo "RABBITMQ_HOST=${RABBITMQ_HOST}" >> Docker/djpanel.env
-      
-      echo "# Database catalogs" >> Docker/djpanel.env
-      echo "IDENTITY_DATABASE_CATALOG=${IDENTITY_DATABASE_CATALOG}" >> Docker/djpanel.env
-      echo "MUSIC_DATABASE_CATALOG=${MUSIC_DATABASE_CATALOG}" >> Docker/djpanel.env
-      echo "GEAR_DATABASE_CATALOG=${GEAR_DATABASE_CATALOG}" >> Docker/djpanel.env
-      echo "DOCUMENTS_DATABASE_CATALOG=${DOCUMENTS_DATABASE_CATALOG}" >> Docker/djpanel.env
-      echo "BRAND_DATABASE_CATALOG=${BRAND_DATABASE_CATALOG}" >> Docker/djpanel.env
-      
-      echo "# Security" >> Docker/djpanel.env
-      echo "SECURE_KEY=${SECURE_KEY}" >> Docker/djpanel.env
-      echo "JWT_KEY=${JWT_KEY}" >> Docker/djpanel.env
-      
-      echo "# Frontend URLs" >> Docker/djpanel.env
-      echo "REACT_APP_IDENTITY_URL=${REACT_APP_IDENTITY_URL}" >> Docker/djpanel.env
-      echo "REACT_APP_MUSIC_URL=${REACT_APP_MUSIC_URL}" >> Docker/djpanel.env
