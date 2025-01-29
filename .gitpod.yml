@@ -8,9 +8,8 @@ vscode:
     - dbaeumer.vscode-eslint
     - dsznajder.es7-react-js-snippets
 
-environment:
-  variables:
-    Environment: Development
+env:
+  Environment: Development
 
 tasks:
   - name: Restore .NET packages for CompanyAPI
