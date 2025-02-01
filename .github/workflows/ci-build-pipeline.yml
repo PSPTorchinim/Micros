@@ -72,7 +72,7 @@ jobs:
       run: echo "artifact_name=$(echo ${{ matrix.service }} | tr '/' '.')" >> $GITHUB_OUTPUT
     - name: Create artifact
       if: steps.check_changes_dotnet.outputs.service == 'true'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.event.inputs.environment }}.${{ steps.prepare-name.outputs.artifact_name }}.${{ needs.set_date.outputs.date }}
         path: ${{ matrix.service }}/bin/Release/net9.0/
